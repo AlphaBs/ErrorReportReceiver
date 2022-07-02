@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'auth_test',
+    name: 'test-error-report-receiver',
     script: './dist/app.js',
 
     // Options reference: https://pm2.keymetrics.io/docs/usage/application-declaration/
