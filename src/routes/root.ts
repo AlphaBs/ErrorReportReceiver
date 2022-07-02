@@ -35,6 +35,29 @@ router.post("/report", async (ctx, next) => {
     await next();
 });
 
+router.post("/test-report", async (ctx, next) => {
+    const body = ctx.request.body;
+    const documentId = body.traceId;
+
+    if (!documentId || typeof documentId !== "string")
+        throw new HttpError("require traceId property", "badrequest", 400)
+
+    ctx.body = {
+        index: config.elastic.index,
+        id: documentId,
+        document: {
+            "appName": body.appName,
+            "appVersion": body.appVersion,
+            "clientId": body.clientId,
+            "osname": body.osname,
+            "@timestamp": body.time,
+            "errorId": body.error.id,
+            "errorLog": body.error.log
+        }
+    };
+    await next();
+});
+
 router.get("/version", async (ctx, next) => {
     ctx.body = config.version;
     await next();
