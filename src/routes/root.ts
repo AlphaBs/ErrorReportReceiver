@@ -3,6 +3,7 @@ import { getConfig } from "../core/configManager.js";
 import { IAppContext } from "../models/IAppContext.js";
 import { IAppState } from "../models/IAppState.js";
 import koaBody from "koa-body";
+import { HttpError } from "../models/HttpError.js";
 
 const config = getConfig();
 const router = new Router<IAppState, IAppContext>();
@@ -11,16 +12,20 @@ router.use(koaBody());
 
 router.post("/report", async (ctx, next) => {
     const body = ctx.request.body;
+    const documentId = body.traceId;
 
-    await ctx.elasticClient.index({
+    if (!documentId || typeof documentId !== "string")
+        throw new HttpError("require traceId property", "badrequest", 400)
+
+    await ctx.elasticClient.create({
         index: config.elastic.index,
+        id: documentId,
         document: {
             "appName": body.appName,
             "appVersion": body.appVersion,
             "clientId": body.clientId,
             "osname": body.osname,
             "@timestamp": body.time,
-            "traceId": body.traceId,
             "errorId": body.error.id,
             "errorLog": body.error.log
         }
